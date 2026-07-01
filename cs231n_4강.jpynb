@@ -1,0 +1,138 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "gpuType": "T4",
+      "authorship_tag": "ABX9TyO+ry25BeOAmllgiDhFvQPk",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/ryueuitae/mmmi/blob/cs231n_%EC%8B%A4%EC%8A%B5/cs231n_4%EA%B0%95.jpynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "id": "fY_KhJACvU1E"
+      },
+      "outputs": [],
+      "source": [
+        "class computationalGraph(object):\n",
+        "  def forward(inputs):\n",
+        "    for gate in self.graph.nodes_topologically_sorted(): # 순서대로 줄세우기\n",
+        "      gate.forward\n",
+        "    return loss\n",
+        "  def backward():\n",
+        "    for gate in reversed(self.graph.nodes_topologically_sorted()): # 맨뒤부터 거꾸러\n",
+        "      gate.backward()\n",
+        "    return inputs_gradients"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "class MultiplyGate(object):\n",
+        "  def forward(x,y):\n",
+        "    z = x*y\n",
+        "    return z\n",
+        "  def backward(dz):\n",
+        "    return [dx,dy]"
+      ],
+      "metadata": {
+        "id": "jUBOkR9ocQaE"
+      },
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "class MultiplyGate(object): # 곱하기방 만들게\n",
+        "  def forward(x,y): # 순전파\n",
+        "    z = x*y\n",
+        "    self.x = x\n",
+        "    self.y = y\n",
+        "    return z\n",
+        "  def backward(dz):\n",
+        "    dx = self.y * dz # dz는 뒤쪽에서 넘어온 누적 그래디언트\n",
+        "    dy = self.x * dz # y자리는 상대방 파트너 x 값 꺼내서 오차와 곱\n",
+        "    return [dx,dy]\n"
+      ],
+      "metadata": {
+        "id": "EZu9QV7fdroo"
+      },
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#np.dot 입력값과 가중치 곱해서 신호 합치기\n",
+        "#np.exp 합쳐진 신호를 0과 1사이의 확률점수로 변환\n",
+        "import numpy as np # 넘파이 가져오기\n",
+        "x = np.array([ [0,0,1], [0,1,1], [1,0,1],[1,1,1] ]) # 입력 데이터\n",
+        "y = np.array([[0,1,1,0]]). T # 정답지\n",
+        "syn0 = 2*np.random.random((3,4)) - 1 # 첫번째 가중치: -1~1\n",
+        "syn1 = 2*np.random.random((4,1)) - 1 # 두번째 가중치: 랜덤\n",
+        "for j in range(60000) : # 6만번의 훈련\n",
+        "  l1 = 1/(1+np.exp(-(np.dot(x,syn0))))\n",
+        "  # 예측 1단계 입력값 x 첫번재 가중치 곱하고 시그모이드 함수 씌워\n",
+        "  l2 = 1/(1+np.exp(-(np.dot(l1,syn1))))\n",
+        "  # 예측 2단계 l1 X 두번째 가중치 곱하고 시그모이드 함수 씌워\n",
+        "  l2_delta = (y-l2) * (l2*(1-l2)) # 출력층 반성: y와 ㅣ2 오차 구하고. 시그모이드 미분값곱\n",
+        "  l1_delta = l2_delta.dot(syn1.T) * (l1 * (1-l1)) # 은닉층 반성: 출력층의 오차를 받아서, 가중치 수정해야할 양 계산\n",
+        "  syn1 += l1.T.dot(l2_delta) # 계산된 수정량 바탕 두번재 가중치 수정\n",
+        "  syn0 += x.T.dot(l1_delta) # 첫번째 가중치 수정\n",
+        "print(l2)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "nwSKRi70eAZn",
+        "outputId": "1289bf6b-95db-4859-9238-02093937ba2c"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[[0.00279837]\n",
+            " [0.99617237]\n",
+            " [0.9975279 ]\n",
+            " [0.00359767]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "9sp0Wtg43Tv0"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
